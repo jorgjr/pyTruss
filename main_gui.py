@@ -315,7 +315,7 @@ def checkForEvent():
             if physical_groups.name:
                 b_id = physical_groups.name[np.uint(gmsh.onelab.getNumber("0Modules/1Physical ID")[0])]
                 if b_id in domain_truss.name:
-                    idx =  domain_truss.tag.index(b_id)
+                    idx =  domain_truss.name.index(b_id)
                     domain_truss.tag.pop(idx)
                     domain_truss.E.pop(idx)
                     domain_truss.A.pop(idx)
