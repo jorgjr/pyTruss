@@ -90,19 +90,22 @@ def truss_solver(d_truss,b_conditions,model):
             for i in v:
                 for j in range(a):
                     m_truss.ue[c][np.int(a*k+j)] = m_truss.U[np.int(a*i+j)]
-                    #m_truss.fn[c][np.int(a*k+j)] = m_truss.F[np.int(a*v+j)]
+                    #m_truss.fn[c][np.int(a*k+j)] = m_truss.F[np.int(a*i+j)]
                 k += 1
         d_nodal = np.zeros((1,num_nod,3))[0]
+        f_nodal = np.zeros((1,num_nod,3))[0]
         ncoord = np.zeros((1,num_nod,3))[0]
         for i in range(num_nod):
             for j in range(a):
                 auxd = m_truss.U[np.int(3*i+j)]
+                auxf = m_truss.F[np.int(3*i+j)]
                 d_nodal[i][j] = auxd
+                f_nodal[i][j] = auxf
                 ncoord[i][j] = coord[i][j]+auxd
         for i in range(num_el):
             m_truss.fe[i] = np.dot((e_truss.EAL[i]*e_truss.Cxyz[i]),m_truss.ue[i])[0]
             m_truss.stresses[i] = m_truss.fe[i]/e_truss.A[i]
-        return m_truss.fe, m_truss.ue, m_truss.stresses, d_nodal, ncoord
+        return m_truss.fe, m_truss.ue, m_truss.stresses, d_nodal, f_nodal, ncoord
 
     num_nod, coord, e_truss, num_el, m_truss = truss_preset(d_truss,model.mesh)
     e_truss, m_truss = truss_elemental_stiffness(d_truss,e_truss,m_truss,model)
@@ -111,8 +114,8 @@ def truss_solver(d_truss,b_conditions,model):
     m_truss.idx_reduction = np.where(m_truss.bU == 0)
     m_truss.idx_rebuild = np.where(np.isnan(m_truss.bU))
     m_truss.F, m_truss.U = eqn_s.solver_static(m_truss)
-    m_truss.fe, m_truss.ue, m_truss.stresses, d_nodal, ncoord = truss_elemental_values(e_truss,m_truss,num_el,num_nod,3)
-    return m_truss.fe, d_nodal, m_truss.stresses, e_truss.tag, e_truss.ntags, num_el, num_nod, coord, ncoord, e_truss.L
+    m_truss.fe, m_truss.ue, m_truss.stresses, d_nodal, f_nodal, ncoord = truss_elemental_values(e_truss,m_truss,num_el,num_nod,3)
+    return m_truss.fe, d_nodal, f_nodal, m_truss.stresses, e_truss.tag, e_truss.ntags, num_el, num_nod, coord, ncoord, e_truss.L
 
 def truss_post(f_elements,d_nodal,s_elements,e_tags,n_el,n_nod,m_Name,n_steps,views):
     
@@ -126,11 +129,12 @@ def truss_post(f_elements,d_nodal,s_elements,e_tags,n_el,n_nod,m_Name,n_steps,vi
     views.write(1, m_Name + "_forceData.pos")
     views.write(2, m_Name + "_stressesData.pos")
 
-def plot_report(e_ntags,e_L,d_nodal,s_elements,m_Name,model,views):
+def plot_report(e_ntags,e_L,n_nod,d_nodal,f_nodal,s_elements,m_Name,model,views):
 
     import os
     import string
     import matplotlib.pyplot as plt
+    import pdfkit
     from PyPDF2 import PdfFileMerger
 
     phyg = model.getPhysicalGroups(1)
@@ -150,6 +154,7 @@ def plot_report(e_ntags,e_L,d_nodal,s_elements,m_Name,model,views):
     for vi in ent:
         k = 0
         for v in vi:
+            fig, ax = plt.subplots(2, 1, sharex=True)
             n_ent.append(nalph[j]+str(k))
             model.setEntityName(1,v[1],n_ent[-1])
             k += 1
@@ -196,6 +201,48 @@ def plot_report(e_ntags,e_L,d_nodal,s_elements,m_Name,model,views):
         if j == 25: nalph = np.char.add(nalph,alph[l]); l += 1
         if l == 25: l = 0
         j += 1 if j <= 24 else -25
+
+    aux = np.uint(np.ceil(n_nod/20)) # number of pages
+    auxd = np.resize(d_nodal,(20*aux,1,3))
+    #plt.clf()
+    #plt.close()
+    plt.figure(1)
+    plt.clf()
+    for i in range(aux):
+        plt.suptitle('Displacement Node Data')
+        plt.text(.1, .95, 'Tag of the Node | [X Y Z]'+'\n')
+        plt.axis('off')
+        k = np.uint(i*20)
+        for c,v in enumerate(auxd[k:np.uint(k+20),0,:]):
+            plt.text(.1, .9-(0.05*c), (str((c+1+k))+' | '+str(v)+'\n'))
+            print(c+1+k)
+            if c+1+k == n_nod:
+                break
+        pdf_file = str(i) + '_d_nodal.pdf'
+        plt.savefig(pdf_file, dpi=150)
+        plt.clf()
+        pdfs.append(pdf_file)
+
+    auxd = np.resize(f_nodal,(20*aux,1,3))
+    #plt.clf()
+    #plt.close()
+    plt.figure(1)
+    plt.clf()
+    for i in range(aux):
+        plt.suptitle('Force Node Data')
+        plt.text(.1, .95, 'Tag of the Node | [X Y Z]'+'\n')
+        plt.axis('off')
+        k = np.uint(i*20)
+        for c,v in enumerate(auxd[k:np.uint(k+20),0,:]):
+            plt.text(.1, .9-(0.05*c), (str((c+1+k))+' | '+str(v)+'\n'))
+            print(c+1+k)
+            if c+1+k == n_nod:
+                break
+        pdf_file = str(i) + '_f_nodal.pdf'
+        plt.savefig(pdf_file, dpi=150)
+        plt.clf()
+        pdfs.append(pdf_file)
+
     merger = PdfFileMerger()
     for pdf in pdfs:
         merger.append(pdf)
@@ -203,3 +250,16 @@ def plot_report(e_ntags,e_L,d_nodal,s_elements,m_Name,model,views):
     merger.close()
     for i in pdfs:
         os.remove(i)
+    #d = open(m_Name + '_d_nodal.txt', 'w+')
+    #d.truncate()
+    #d.write('Tag of the Node | [X Y Z]'+'\n'+'\n')
+    #f = open(m_Name + '_f_nodal.txt', 'w+')
+    #f.truncate()
+    #f.write('Tag of the Node | [X Y Z]'+'\n'+'\n')
+    #dd = []
+    #for c,v in enumerate(d_nodal):
+    #    d.write(str(c)+' | '+str(v)+'\n')
+    #    dd.append(str(c)+' | '+str(v)+'\n')
+    #    f.write(str(c)+' | '+str(f_nodal[c])+'\n')
+    #d.close()
+    #f.close()
