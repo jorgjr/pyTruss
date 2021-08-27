@@ -194,18 +194,14 @@ def plot_report(e_ntags,e_L,n_nod,d_nodal,f_nodal,s_elements,m_Name,model,views)
             pdf_file = n_ent[-1] + '_2d_plot.pdf'
             plt.savefig(pdf_file, dpi=150)
             pdfs.append(pdf_file)
-            #plt.savefig(n_ent[c] + '_2d_plot.png')
             #plt.show()
             ax[0].cla()
             ax[1].cla()
         if j == 25: nalph = np.char.add(nalph,alph[l]); l += 1
         if l == 25: l = 0
         j += 1 if j <= 24 else -25
-
     aux = np.uint(np.ceil(n_nod/20)) # number of pages
     auxd = np.resize(d_nodal,(20*aux,1,3))
-    #plt.clf()
-    #plt.close()
     plt.figure(1)
     plt.clf()
     for i in range(aux):
@@ -224,8 +220,6 @@ def plot_report(e_ntags,e_L,n_nod,d_nodal,f_nodal,s_elements,m_Name,model,views)
         pdfs.append(pdf_file)
 
     auxd = np.resize(f_nodal,(20*aux,1,3))
-    #plt.clf()
-    #plt.close()
     plt.figure(1)
     plt.clf()
     for i in range(aux):
@@ -242,7 +236,6 @@ def plot_report(e_ntags,e_L,n_nod,d_nodal,f_nodal,s_elements,m_Name,model,views)
         plt.savefig(pdf_file, dpi=150)
         plt.clf()
         pdfs.append(pdf_file)
-
     merger = PdfFileMerger()
     for pdf in pdfs:
         merger.append(pdf)
@@ -250,16 +243,3 @@ def plot_report(e_ntags,e_L,n_nod,d_nodal,f_nodal,s_elements,m_Name,model,views)
     merger.close()
     for i in pdfs:
         os.remove(i)
-    #d = open(m_Name + '_d_nodal.txt', 'w+')
-    #d.truncate()
-    #d.write('Tag of the Node | [X Y Z]'+'\n'+'\n')
-    #f = open(m_Name + '_f_nodal.txt', 'w+')
-    #f.truncate()
-    #f.write('Tag of the Node | [X Y Z]'+'\n'+'\n')
-    #dd = []
-    #for c,v in enumerate(d_nodal):
-    #    d.write(str(c)+' | '+str(v)+'\n')
-    #    dd.append(str(c)+' | '+str(v)+'\n')
-    #    f.write(str(c)+' | '+str(f_nodal[c])+'\n')
-    #d.close()
-    #f.close()
