@@ -62,7 +62,7 @@ def checkForEvent():
 
     global domain_truss, boundary_conditions, post_options, change, check, physical_groups, \
         f_elements, d_nodal, s_elements, e_tags, e_ntags, n_el, n_nod, coord, ncoord, \
-        n_steps, e_L
+        n_steps, e_L, f_nodal
 
     while 1:
         root_path = "0Modules/0Selection Mode"
@@ -360,13 +360,13 @@ def checkForEvent():
         gmsh.fltk.setStatusMessage("Solving...", True)
         gmsh.fltk.lock()
         gmsh.model.mesh.generate(1)
-        f_elements,d_nodal,s_elements,e_tags,e_ntags,n_el,n_nod,coord,ncoord,e_L = solvers.truss_space1.truss_solver(domain_truss,boundary_conditions,gmsh.model)
+        f_elements,d_nodal,f_nodal,s_elements,e_tags,e_ntags,n_el,n_nod,coord,ncoord,e_L = solvers.truss_space1.truss_solver(domain_truss,boundary_conditions,gmsh.model)
         post_options.type = "Truss"
         post_options.model = gmsh.model.getCurrent()
         post_options.check = True
         n_steps = gmsh.onelab.getNumber("0Modules/Post-processing/0Steps Data/0Number of Steps")[0]
         solvers.truss_space1.truss_post(f_elements,d_nodal,s_elements,e_tags,n_el,n_nod,post_options.model,n_steps,gmsh.view)
-        solvers.truss_space1.plot_report(e_ntags,e_L,d_nodal,s_elements,post_options.model,gmsh.model,gmsh.view)
+        solvers.truss_space1.plot_report(e_ntags,e_L,n_nod,d_nodal,f_nodal,s_elements,post_options.model,gmsh.model,gmsh.view)
         gmsh.fltk.unlock()
         gmsh.fltk.update()
         if gmsh.fltk.isAvailable() == 0: return 0
