@@ -129,11 +129,12 @@ def truss_post(f_elements,d_nodal,s_elements,e_tags,n_el,n_nod,m_Name,n_steps,vi
     views.write(1, m_Name + "_forceData.pos")
     views.write(2, m_Name + "_stressesData.pos")
 
-def plot_report(e_ntags,e_L,n_nod,d_nodal,f_nodal,s_elements,m_Name,model,views):
+def plot_report(e_ntags,e_L,n_nod,d_nodal,f_nodal,s_elements,f_elements,m_Name,model,views):
 
     import os
     import string
     import matplotlib.pyplot as plt
+    import matplotlib.gridspec as gridspec
     import pdfkit
     from PyPDF2 import PdfFileMerger
 
@@ -149,12 +150,15 @@ def plot_report(e_ntags,e_L,n_nod,d_nodal,f_nodal,s_elements,m_Name,model,views)
     n_ent = []
     j = 0
     l = 0
-    fig, ax = plt.subplots(2, 1, sharex=True)
     pdfs = []
     for vi in ent:
         k = 0
         for v in vi:
-            fig, ax = plt.subplots(2, 1, sharex=True)
+            fig = plt.figure(constrained_layout=True)
+            gs = gridspec.GridSpec(2, 2, figure=fig)
+            ax0 = fig.add_subplot(gs[0, :])
+            ax1 = fig.add_subplot(gs[1, 0])
+            ax2 = fig.add_subplot(gs[1, 1])
             n_ent.append(nalph[j]+str(k))
             model.setEntityName(1,v[1],n_ent[-1])
             k += 1
@@ -162,77 +166,88 @@ def plot_report(e_ntags,e_L,n_nod,d_nodal,f_nodal,s_elements,m_Name,model,views)
             aux = e_ntags.tolist()
             idx = aux.index(nodeTags)
             x2 = e_L[idx]
-            # Displacement
+           # Displacement
             y1 = np.sqrt(d_nodal[nodeTags[0]][0]**2+d_nodal[nodeTags[0]][1]**2+d_nodal[nodeTags[0]][2]**2)
             y2 = np.sqrt(d_nodal[nodeTags[1]][0]**2+d_nodal[nodeTags[1]][1]**2+d_nodal[nodeTags[1]][2]**2)
-            ax[0].set_title('Displacement', fontsize=10)
-            ax[0].yaxis.set_major_formatter('{x:.3f}')
-            ax[0].text(0, 1.2, '2D Plot of the entity: ' + n_ent[-1],
+            ax0.set_title('Displacement', fontsize=10)
+            ax0.set_xlabel('Truss Length', fontsize=10)
+            ax0.set_ylabel(' ', fontsize=10)
+            ax0.yaxis.set_major_formatter('{x:.3f}')
+            ax0.text(0, 1.2, '2D Plot of the entity: ' + n_ent[-1],
                     horizontalalignment='left',
                     verticalalignment='top',
-                    transform=ax[0].transAxes)
-            ax[0].text(1, 1.2, 'At 1st node : ' + '{0:.3f}'.format(y1),
+                    transform=ax0.transAxes)
+            ax0.text(1, 1.2, 'At 1st node : ' + '{0:.3f}'.format(y1),
                     horizontalalignment='right',
                     verticalalignment='top',
-                    transform=ax[0].transAxes)
-            ax[0].text(1, 1.1, 'At 2nd node : ' + '{0:.3f}'.format(y2),
+                    transform=ax0.transAxes)
+            ax0.text(1, 1.15, 'At 2nd node : ' + '{0:.3f}'.format(y2),
                     horizontalalignment='right',
                     verticalalignment='top',
-                    transform=ax[0].transAxes)
-            ax[0].plot([0,x2],[y1,y2])
+                    transform=ax0.transAxes)
+            ax0.plot([0,x2],[y1,y2])
             # Stress
             y1 = s_elements[idx][0]
             y2 = y1
-            ax[1].set_title('Stress', fontsize=10)
-            ax[1].set_xlabel('Truss Length', fontsize=10)
-            ax[1].yaxis.set_major_formatter('{x:.4f}')
-            ax[1].text(1, 1.1, 'Stress: ' + '{0:.4f}'.format(y1),
-                    horizontalalignment='right',
-                    verticalalignment='top',
-                    transform=ax[1].transAxes)
-            ax[1].plot([0,x2],[y1,y2])
+            ax1.set_title('Stress: ' + '{0:.4f}'.format(y1), fontsize=10)
+            ax1.set_ylabel(' ', fontsize=10)
+            ax1.yaxis.set_major_formatter('{x:.4f}')
+            ax1.plot([0,x2],[y1,y2])
+            # Forces
+            y1 = f_elements[idx][0]
+            y2 = y1
+            ax2.set_title('Force: ' + '{0:.4f}'.format(y1), fontsize=10)
+            ax2.set_ylabel(' ', fontsize=10)
+            ax2.yaxis.set_major_formatter('{x:.4f}')
+            ax2.plot([0,x2],[y1,y2])
             pdf_file = n_ent[-1] + '_2d_plot.pdf'
+            fig.set_size_inches(11.69,8.27)
+            fig.tight_layout()
             plt.savefig(pdf_file, dpi=150)
             pdfs.append(pdf_file)
             #plt.show()
-            ax[0].cla()
-            ax[1].cla()
+            ax0.cla()
+            ax1.cla()
+            ax2.cla()
         if j == 25: nalph = np.char.add(nalph,alph[l]); l += 1
         if l == 25: l = 0
         j += 1 if j <= 24 else -25
-    aux = np.uint(np.ceil(n_nod/20)) # number of pages
-    auxd = np.resize(d_nodal,(20*aux,1,3))
+    aux = np.uint(np.ceil(n_nod/40)) # number of pages
+    auxd = np.resize(d_nodal,(40*aux,1,3))
     plt.figure(1)
     plt.clf()
     for i in range(aux):
         plt.suptitle('Displacement Node Data')
         plt.text(.1, .95, 'Tag of the Node | [X Y Z]'+'\n')
         plt.axis('off')
-        k = np.uint(i*20)
-        for c,v in enumerate(auxd[k:np.uint(k+20),0,:]):
-            plt.text(.1, .9-(0.05*c), (str((c+1+k))+' | '+str(v)+'\n'))
+        k = np.uint(i*40)
+        for c,v in enumerate(auxd[k:np.uint(k+40),0,:]):
+            plt.text(.1, .9-(0.025*c), (str((c+1+k))+' | '+str(v)+'\n'))
             print(c+1+k)
             if c+1+k == n_nod:
                 break
         pdf_file = str(i) + '_d_nodal.pdf'
+        plt.figure(1).set_size_inches(11.69,8.27)
+        plt.tight_layout()
         plt.savefig(pdf_file, dpi=150)
         plt.clf()
         pdfs.append(pdf_file)
-
-    auxd = np.resize(f_nodal,(20*aux,1,3))
+    auxd = np.resize(f_nodal,(40*aux,1,3))
     plt.figure(1)
     plt.clf()
     for i in range(aux):
         plt.suptitle('Force Node Data')
         plt.text(.1, .95, 'Tag of the Node | [X Y Z]'+'\n')
         plt.axis('off')
-        k = np.uint(i*20)
-        for c,v in enumerate(auxd[k:np.uint(k+20),0,:]):
-            plt.text(.1, .9-(0.05*c), (str((c+1+k))+' | '+str(v)+'\n'))
+        k = np.uint(i*40)
+        for c,v in enumerate(auxd[k:np.uint(k+40),0,:]):
+            plt.text(.1, .9-(0.025*c), (str((c+1+k))+' | '+str(v)+'\n'))
             print(c+1+k)
             if c+1+k == n_nod:
                 break
         pdf_file = str(i) + '_f_nodal.pdf'
+        plt.figure(1).set_size_inches(11.69,8.27)
+        plt.tight_layout()
         plt.savefig(pdf_file, dpi=150)
         plt.clf()
         pdfs.append(pdf_file)
