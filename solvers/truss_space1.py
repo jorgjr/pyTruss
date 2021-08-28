@@ -111,7 +111,6 @@ def truss_solver(d_truss,b_conditions,model):
     e_truss, m_truss = truss_elemental_stiffness(d_truss,e_truss,m_truss,model)
     m_truss.K, m_truss.rol, m_truss.col = gs_assembly.global_stiffness_assembly(e_truss.ntags,m_truss.ke,num_el,3,2)
     m_truss.bF, m_truss.bU = set_bc.truss(e_truss,b_conditions,num_nod,3,model.mesh)
-    m_truss.idx_reduction = np.where(m_truss.bU == 0)
     m_truss.idx_rebuild = np.where(np.isnan(m_truss.bU))
     m_truss.F, m_truss.U = eqn_s.solver_static(m_truss)
     m_truss.fe, m_truss.ue, m_truss.stresses, d_nodal, f_nodal, ncoord = truss_elemental_values(e_truss,m_truss,num_el,num_nod,3)
