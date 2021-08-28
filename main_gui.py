@@ -366,7 +366,7 @@ def checkForEvent():
         post_options.check = True
         n_steps = gmsh.onelab.getNumber("0Modules/Post-processing/0Steps Data/0Number of Steps")[0]
         solvers.truss_space1.truss_post(f_elements,d_nodal,s_elements,e_tags,n_el,n_nod,post_options.model,n_steps,gmsh.view)
-        solvers.truss_space1.plot_report(e_ntags,e_L,n_nod,d_nodal,f_nodal,s_elements,post_options.model,gmsh.model,gmsh.view)
+        solvers.truss_space1.plot_report(e_ntags,e_L,n_nod,d_nodal,f_nodal,s_elements,f_elements,post_options.model,gmsh.model,gmsh.view)
         gmsh.fltk.unlock()
         gmsh.fltk.update()
         if gmsh.fltk.isAvailable() == 0: return 0
