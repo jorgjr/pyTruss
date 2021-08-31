@@ -392,6 +392,12 @@ def checkForEvent():
         change = Change()
         check = Check()
         physical_groups = PhysicalGroups()
+        gmsh.view.add("Displacement",0)
+        gmsh.option.setNumber('View[0].Visible', 0)
+        gmsh.view.add("Force",1)
+        gmsh.option.setNumber('View[1].Visible', 0)
+        gmsh.view.add("Stresses",2)
+        gmsh.option.setNumber('View[2].Visible', 0)
         if gmsh.fltk.isAvailable() == 0: return 0
         gmsh.fltk.setStatusMessage("Data cleared", True)
 
