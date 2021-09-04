@@ -17,6 +17,7 @@ def set_gui():
     gmsh.option.setNumber('Geometry.Lines', 1)
     gmsh.option.setNumber('Geometry.Surfaces', 1)
     gmsh.option.setNumber('Geometry.Volumes', 1)
+    gmsh.option.setNumber('PostProcessing.AnimationDelay', 0.01666667)
     gmsh.option.setNumber('Mesh.Points', 0)
     gmsh.option.setNumber('Mesh.PointType',1)
     gmsh.option.setNumber('Mesh.SurfaceEdges', 1)
@@ -34,10 +35,20 @@ def set_gui():
     gmsh.option.setColor('Mesh.Trihedra', 210,210,0,255)
     gmsh.view.add("Displacement",0)
     gmsh.option.setNumber('View[0].Visible', 0)
+    gmsh.option.setNumber('View[0].DrawPoints', 0)
+    gmsh.option.setNumber('View[0].LineWidth', 10)
+    gmsh.option.setNumber('View[0].VectorType', 5)
+    gmsh.option.setNumber('View[0].Light', 0)
     gmsh.view.add("Force",1)
     gmsh.option.setNumber('View[1].Visible', 0)
+    gmsh.option.setNumber('View[1].LineType', 1)
+    gmsh.option.setNumber('View[1].LineWidth', 3)
+    gmsh.option.setNumber('View[1].Light', 0)
     gmsh.view.add("Stresses",2)
     gmsh.option.setNumber('View[2].Visible', 0)
+    gmsh.option.setNumber('View[2].LineType', 1)
+    gmsh.option.setNumber('View[2].LineWidth', 3)
+    gmsh.option.setNumber('View[2].Light', 0)
 
     param_gui = """
     [
@@ -220,7 +231,7 @@ def set_gui():
       {
         "type":"number",
         "name":"0Modules/Post-processing/0Steps Data/0Number of Steps",
-        "values":[10],
+        "values":[180],
         "min":0,
         "max":1e9,
         "step":1
