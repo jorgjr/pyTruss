@@ -39,6 +39,7 @@ def set_gui():
     gmsh.option.setNumber('View[0].LineWidth', 10)
     gmsh.option.setNumber('View[0].VectorType', 5)
     gmsh.option.setNumber('View[0].Light', 0)
+    gmsh.option.setNumber('View[0].ShowTime', 0)
     gmsh.view.add("Force",1)
     gmsh.option.setNumber('View[1].Visible', 0)
     gmsh.option.setNumber('View[1].LineType', 1)
