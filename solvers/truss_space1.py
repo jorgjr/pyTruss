@@ -139,7 +139,9 @@ def plot_report(e_ntags,e_L,n_nod,d_nodal,f_nodal,s_elements,f_elements,m_Name,m
     import string
     import matplotlib.pyplot as plt
     import matplotlib.gridspec as gridspec
+    import matplotlib.ticker as ticker
     import pdfkit
+    from decimal import Decimal
     from PyPDF2 import PdfFileMerger
 
     phyg = model.getPhysicalGroups(1)
@@ -190,29 +192,21 @@ def plot_report(e_ntags,e_L,n_nod,d_nodal,f_nodal,s_elements,f_elements,m_Name,m
                     horizontalalignment='right',
                     verticalalignment='top',
                     transform=ax0.transAxes)
-            #ax0.text(1, 1.2, 'At 1st node : ' + '{0:.3f}'.format(y1),
-            #        horizontalalignment='right',
-            #        verticalalignment='top',
-            #        transform=ax0.transAxes)
-            #ax0.text(1, 1.15, 'At 2nd node : ' + '{0:.3f}'.format(y2),
-            #        horizontalalignment='right',
-            #        verticalalignment='top',
-            #        transform=ax0.transAxes)
             ax0.plot([0,x2],[y1,y2])
             # Stress
             y1 = s_elements[idx][0]
             y2 = y1
-            ax1.set_title('Stress: ' + '{0:.4f}'.format(y1), fontsize=10)
-            ax1.set_ylabel(' ', fontsize=10)
-            ax1.yaxis.set_major_formatter('{x:.4f}')
             ax1.plot([0,x2],[y1,y2])
+            ax1.set_title('Stress: ' + '{:.2e}'.format(Decimal(str(y1))), fontsize=10)
+            ax1.set_ylabel(' ', fontsize=10)
+            ax1.ticklabel_format(axis = 'y', style = 'sci', scilimits = (0,0), useOffset = True)
             # Forces
             y1 = f_elements[idx][0]
             y2 = y1
-            ax2.set_title('Force: ' + '{0:.4f}'.format(y1), fontsize=10)
-            ax2.set_ylabel(' ', fontsize=10)
-            ax2.yaxis.set_major_formatter('{x:.4f}')
             ax2.plot([0,x2],[y1,y2])
+            ax2.set_title('Force: ' + '{:.2e}'.format(Decimal(str(y1))), fontsize=10)
+            ax2.set_ylabel(' ', fontsize=10)
+            ax2.ticklabel_format(axis = 'y', style = 'sci', scilimits = (0,0), useOffset = True)
             pdf_file = n_ent[-1] + '_2d_plot.pdf'
             fig.set_size_inches(11.69,8.27)
             fig.tight_layout()
