@@ -139,7 +139,6 @@ def plot_report(e_ntags,e_L,n_nod,d_nodal,f_nodal,s_elements,f_elements,m_Name,m
     import string
     import matplotlib.pyplot as plt
     import matplotlib.gridspec as gridspec
-    import matplotlib.ticker as ticker
     import pdfkit
     from decimal import Decimal
     from PyPDF2 import PdfFileMerger
@@ -179,16 +178,16 @@ def plot_report(e_ntags,e_L,n_nod,d_nodal,f_nodal,s_elements,f_elements,m_Name,m
             ax0.set_title('Displacement', fontsize=10)
             ax0.set_xlabel('Truss Length', fontsize=10)
             ax0.set_ylabel(' ', fontsize=10)
-            ax0.yaxis.set_major_formatter('{x:.3f}')
+            ax0.ticklabel_format(axis = 'y', style = 'sci', scilimits = (0,0), useOffset = True)
             ax0.text(0, 1.2, '2D Plot of the entity: ' + n_ent[-1],
                     horizontalalignment='left',
                     verticalalignment='top',
                     transform=ax0.transAxes)
-            ax0.text(1, 1.2, 'At node ' + '#' + str(nodeTags[0]+1) + ': ' + '{0:.3f}'.format(y1),
+            ax0.text(1, 1.2, 'At node ' + '#' + str(nodeTags[0]+1) + ': ' + '{:.2e}'.format(Decimal(str(y1))),
                     horizontalalignment='right',
                     verticalalignment='top',
                     transform=ax0.transAxes)
-            ax0.text(1, 1.15, 'At node ' + '#' + str(nodeTags[1]+1) + ': '+ '{0:.3f}'.format(y2),
+            ax0.text(1, 1.15, 'At node ' + '#' + str(nodeTags[1]+1) + ': '+ '{:.2e}'.format(Decimal(str(y2))),
                     horizontalalignment='right',
                     verticalalignment='top',
                     transform=ax0.transAxes)
